@@ -1,0 +1,271 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head> <h1>Real-Time Multi-device Log Viewer</h1>
+<style>
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+    
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;  
+}
+
+td:hover {
+	overflow: visible;
+	white-space: normal;
+}
+
+tr:nth-child(even) {
+    background-color: #dddddd;
+}
+
+@keyframes blink {
+    /**
+     * At the start of the animation the dot
+     * has an opacity of .2
+     */
+    0% {
+      opacity: .2;
+    }
+    /**
+     * At 20% the dot is fully visible and
+     * then fades out slowly
+     */
+    20% {
+      opacity: 1;
+    }
+    /**
+     * Until it reaches an opacity of .2 and
+     * the animation can start again
+     */
+    100% {
+      opacity: .2;
+    }
+}
+
+.saving span {
+    /**
+     * Use the blink animation, which is defined above
+     */
+    animation-name: blink;
+    /**
+     * The animation should take 1.4 seconds
+     */
+    animation-duration: 1.4s;
+    /**
+     * It will repeat itself forever
+     */
+    animation-iteration-count: infinite;
+    /**
+     * This makes sure that the starting style (opacity: .2)
+     * of the animation is applied before the animation starts.
+     * Otherwise we would see a short flash or would have
+     * to set the default styling of the dots to the same
+     * as the animation. Same applies for the ending styles.
+     */
+    animation-fill-mode: both;
+    font-size: 30px;
+}
+
+.saving span:nth-child(2) {
+    /**
+     * Starts the animation of the third dot
+     * with a delay of .2s, otherwise all dots
+     * would animate at the same time
+     */
+    animation-delay: .2s;
+}
+
+.saving span:nth-child(3) {
+    /**
+     * Starts the animation of the third dot
+     * with a delay of .4s, otherwise all dots
+     * would animate at the same time
+     */
+    animation-delay: .4s;
+}
+#checkbox {
+  opacity: 0;
+}
+/**
+ * Checkbox Three
+ */
+.checkboxThree {
+	width: 120px;
+	height: 40px;
+	background: #333;
+	margin: 20px 60px;
+
+	border-radius: 50px;
+	position: relative;
+	
+}
+/**
+ * Create the text for the On position
+ */
+.checkboxThree:before {
+	content: 'START';
+	position: absolute;
+	top: 12px;
+	left: 13px;
+	height: 2px;
+	color: #26ca28;
+	font-size: 13px;
+}
+/**
+ * Create the label for the off position
+ */
+.checkboxThree:after {
+	content: 'STOP';
+	position: absolute;
+	top: 12px;
+	left: 80px;
+	height: 2px;
+	color: #FF0000;
+	font-size: 13px;
+}
+/**
+ * Create the pill to click
+ */
+.checkboxThree label {
+	display: block;
+	width: 52px;
+	height: 22px;
+	border-radius: 50px;
+
+	transition: all .5s ease;
+	cursor: pointer;
+	position: absolute;
+	top: 9px;
+	z-index: 1;
+	left: 12px;
+	background: #ddd;
+}
+
+/**
+ * Create the checkbox event for the label
+ */
+.checkboxThree input[type=checkbox]:checked + label {
+	left: 60px;
+	background: #26ca28;
+}
+input[type="checkbox"] {
+  opacity: 0;
+  width: 0;
+  height: 0; 
+}
+
+</style>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>CD-TRS</title>
+ <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+        <script>
+           // $(document).on("click", "#somebutton", function() { // When HTML DOM "click" event is invoked on element with ID "somebutton", execute the following function...
+             //   $.get("ShowSummary", function(responseText) {   // Execute Ajax GET request on URL of "someservlet" and execute the following function with Ajax response text...
+             //       $("#somediv").text(responseText);           // Locate HTML DOM element with ID "somediv" and set its text content with the response text.
+            //    });
+        //    });
+            
+            $(document).ready(function(){refresh();});
+            function refresh(){
+            	if($("#checkboxThreeInput").prop('checked')){
+	            	$.get("ShowSummary", function(responseText) {   // Execute Ajax GET request on URL of "someservlet" and execute the following function with Ajax response text...
+	                    /*var obj = $("#somediv").text(responseText + '\n'); // Locate HTML DOM element with ID "somediv" and set its text content with the response text.
+	                    obj.html(obj.html().replace(/\n/g,'<br/>'));*/
+	                    var r = responseText.split("#");
+	                    var table = document.getElementById("table");
+	                    var rowCount = $('#table tr').length;
+	                    while(rowCount+1 < r.length){
+	                    	var row = table.insertRow(2);
+	                    	var cell1 = row.insertCell(0);
+	                        var cell2 = row.insertCell(1);
+	                        var cell3 = row.insertCell(2);
+	                        var cell4 = row.insertCell(3);
+	                        var cell5 = row.insertCell(4);
+	                        var cell6 = row.insertCell(5);
+	                        cell1.innerHTML = r[rowCount].split("*")[0].replace("EDF |", "");;//asn
+	                        cell2.innerHTML = r[rowCount].split("*")[1].replace("EDF |", "");//device1
+	                        cell3.innerHTML = r[rowCount].split("*")[2].replace("EDF |", "");//device2
+	                        cell4.innerHTML = r[rowCount].split("*")[3].replace("EDF |", "");//device3
+	                        cell5.innerHTML = r[rowCount].split("*")[4].replace("EDF |", "");//device4
+	                        
+	                        var send_flow = " ";
+	            			var recv_flow = " ";
+	            			var sender = 0;
+	            			var recver = 0;
+	                        var i;
+	                        for(i=1;i<4;i++){
+	                        if(r[rowCount].split("*")[i].indexOf("RADIOSEND") != -1){
+	                        	var send_flow_index = r[rowCount].split("*")[i].indexOf("flow")+5;
+	                        	var send_flow = r[rowCount].split("*")[i].substring(send_flow_index, send_flow_index+1);
+	                        	var sender = i;
+	                        }
+	                        if(r[rowCount].split("*")[i].indexOf("RADIORECV") != -1){
+	                        	var recv_flow_index = r[rowCount].split("*")[i].indexOf("flow")+5;
+	                        	var recv_flow = r[rowCount].split("*")[i].substring(recv_flow_index, recv_flow_index+1);
+	                        	var recver = i;
+	                        }
+	                        }
+	                        if(send_flow != " " && recv_flow != " " && send_flow == recv_flow){
+	                        	var data_flow = "flow="+send_flow+"<br>"+"Device"+sender+"<br>"+"<span>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&#8595;</span>"+"<br>"+"Device"+recver;
+	                        	cell6.innerHTML = data_flow; //data flow
+	        				}
+	                        rowCount++;
+	                    }
+	                    setTimeout(function(){refresh();},200);
+	            	});
+            	}else{
+                    setTimeout(function(){refresh();},200);
+            	}
+            }
+        </script>
+</head>
+<body>
+<!-- <button id="somebutton">press here</button> -->
+		<!-- input type="checkbox" id="subscribe" checked=true>
+		<label>START</label> -->
+		<!-- Slide THREE -->
+<!-- <div class="slideThree">	
+	<input type="checkbox" value="None" id="slideThree" name="check" checked=true/>
+	<label for="slideThree"></label>
+</div> -->
+<section>
+  <!-- Checbox Three -->
+  	<div class="checkboxThree">
+  		<input type="checkbox" value="1" id="checkboxThreeInput" name="" checked=true />
+	  	<label for="checkboxThreeInput"></label>
+  	</div>
+  	<div>*Hover to view details.</div>
+</section>
+<!-- <button id="somebutton">press here</button> -->
+
+        <div id="somediv"></div>
+        <table id="table">
+  			<tr>
+  				<th>ASN</th>
+    			<th>Device1</th>
+    			<th>Device2</th>
+    			<th>Device3</th>
+    			<th>Device4</th>
+    			<th>Data Flow</th>
+  			</tr>
+  			<tr>
+  				<th><p class="saving">Loading<span>.</span><span>.</span><span>.</span></p></th>
+    			<th><p class="saving"><span>.</span><span>.</span><span>.</span></p></th>
+    			<th><p class="saving"><span>.</span><span>.</span><span>.</span></p></th>
+    			<th><p class="saving"><span>.</span><span>.</span><span>.</span></p></th>
+    			<th><p class="saving"><span>.</span><span>.</span><span>.</span></p></th>
+    			<th><p class="saving"><span>.</span><span>.</span><span>.</span></p></th>
+  			</tr>
+		</table>
+</body>
+</html>
